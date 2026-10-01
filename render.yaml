@@ -1,0 +1,32 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Deploys the API (server/) on Render's free plan. Data lives in Turso, so restarts lose nothing.
+services:
+  - type: web
+    name: possession-watch-api
+    runtime: node
+    plan: free
+    region: singapore # closest Render region to India
+    rootDir: server
+    # NODE_ENV=production makes npm skip devDependencies, but the TypeScript compiler is one.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      # Shared secret the app sends as a Bearer token. Render generates it; copy it into the app's EAS env.
+      - key: APP_API_TOKEN
+        generateValue: true
+      # Set in the Render dashboard when creating the Blueprint (never committed).
+      - key: FIRECRAWL_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_AUTH_TOKEN
+        sync: false
+      - key: INNGEST_EVENT_KEY
+        sync: false
+      - key: INNGEST_SIGNING_KEY
+        sync: false
